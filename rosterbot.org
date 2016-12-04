@@ -8,6 +8,7 @@ Built in Clojure, RosterBot is released under the GPL3. The following libraries 
 + [[https://github.com/aengelberg/loco][aengelberg/loco]] :: Constraint Programming
 + [[https://github.com/yogthos/clj-pdf][yogthos/clj-pdf]] :: PDF generation
 + [[https://github.com/SparkFund/google-apps-clj][SparkFund/google-apps-clj]] :: Google Calendar sync
++ [[https://github.com/clj-time/clj-time][clj-time]] :: Date/time library
 
 * TODO Core Logic
 
