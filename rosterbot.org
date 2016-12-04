@@ -1,9 +1,13 @@
-#+title: RosterBuilder
+#+title: RosterBot
 #+author: Elliott "Seylerius" Seyler
 
-RosterBuilder (tentative name) is a tool for automatically generating duty rosters for teams. Operating on [[https://en.wikipedia.org/wiki/Constraint_programming][Constraint Programming]], the software narrows the pool of schedules based on the specified restrictions, then iterates through them to find an optimal selection.
+RosterBot is a tool for automatically generating duty rosters for teams. Operating on [[https://en.wikipedia.org/wiki/Constraint_programming][Constraint Programming]], the software narrows the pool of schedules based on the specified restrictions, then iterates through them to find an optimal selection.
 
-Built in Clojure, RosterBuilder is released under the GPL3.
+Built in Clojure, RosterBot is released under the GPL3. The following libraries are used by RosterBot:
+
++ [[https://github.com/aengelberg/loco][aengelberg/loco]] :: Constraint Programming
++ [[https://github.com/yogthos/clj-pdf][yogthos/clj-pdf]] :: PDF generation
++ [[https://github.com/SparkFund/google-apps-clj][SparkFund/google-apps-clj]] :: Google Calendar sync
 
 * TODO Core Logic
 
