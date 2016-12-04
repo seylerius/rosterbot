@@ -1,0 +1,55 @@
+#+title: RosterBuilder
+#+author: Elliott "Seylerius" Seyler
+
+RosterBuilder (tentative name) is a tool for automatically generating duty rosters for teams. Operating on [[https://en.wikipedia.org/wiki/Constraint_programming][Constraint Programming]], the software narrows the pool of schedules based on the specified restrictions, then iterates through them to find an optimal selection.
+
+Built in Clojure, RosterBuilder is released under the GPL3.
+
+* TODO Core Logic
+
+** TODO Base Constraint Model
+
+Constraint programming operates on a model of bounded variables which are reduced and restricted until a solution is found that meets all constraints. Constraints are defined in terms of variables.
+
+*** TODO Model timespan with each day's shifts
+
+The most flexible option seems to be generating ~employee-day~ variables, by iterating through the date range, then iterating through the employee list. I'll map each assignment-state to a number: 
+
++ Requested time off :: ~-2~
++ Assigned elsewhere :: ~-1~
++ Unassigned :: ~0~
++ Shifts :: ~1–N~
+
+*** TODO Model shift definitions and restrictions
+
+Shift restrictions will be added as constraints as the ~employee-day~ variables are generated. Shifts will have schedule options as follows:
+
++ Every ~X~ days
++ Specified days-of-week every ~X~ weeks
++ Specified days-of-month every ~X~ months
+
+Shift exceptions can be specified as dates and date ranges, causing the modified shift to not be generated for those dates.
+
+*** TODO Constrain employees by other obligations and personal requests
+
+*** TODO Model balanced shift distribution
+
+* TODO Data I/O
+
+** TODO Store Definitions Locally
+
+** TODO Sync Employee Availability
+
+** TODO Sync Produced Roster
+
+* TODO Graphical User Interface
+
+** TODO Shift Definition Screen
+
+** TODO Employee Definition Screen
+
+*** TODO Employee Availability Screen
+
+** TODO Generated Roster View
+
+*** TODO Enable Roster Modification
