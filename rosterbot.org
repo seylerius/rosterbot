@@ -10,51 +10,82 @@ Built in Clojure, RosterBot is released under the GPL3. The following libraries 
 + [[https://github.com/SparkFund/google-apps-clj][SparkFund/google-apps-clj]] :: Google Calendar sync
 + [[https://github.com/clj-time/clj-time][clj-time]] :: Date/time library
 
-* TODO Core Logic
+* Workspace
 
-** TODO Base Constraint Model
+#+BEGIN_SRC emacs-lisp
+
+  (clj-workspace (concat "~/src/freelance/marco-peters/rosterbot"
+                         "/src/com/seriouslyseylerius/rosterbot.clj")
+                 "~/src/freelance/marco-peters/rosterbot/project.clj")
+
+#+END_SRC
+
+#+RESULTS:
+: #<process nrepl-server>
+
+* TODO [#A] Core Logic
+
+** TODO [#A] Base Constraint Model
 
 Constraint programming operates on a model of bounded variables which are reduced and restricted until a solution is found that meets all constraints. Constraints are defined in terms of variables.
 
-*** TODO Model timespan with each day's shifts
+*** DONE [#A] Model timespan with each day's shifts
+CLOSED: [2016-12-10 Sat 00:56]
 
-The most flexible option seems to be generating ~employee-day~ variables, by iterating through the date range, then iterating through the employee list. I'll map each assignment-state to a number: 
+The most flexible option seems to be generating an ~employee-day~ matrix, by iterating through the date range, then iterating through the employee list. I'll map each assignment-state to a number: 
 
-+ Requested time off :: ~-2~
-+ Assigned elsewhere :: ~-1~
++ Assigned elsewhere :: ~-2~
++ Requested time off :: ~-1~
 + Unassigned :: ~0~
 + Shifts :: ~1–N~
 
-*** TODO Model shift definitions and restrictions
+*** DONE [#A] Model shift recurrence
+CLOSED: [2016-12-10 Sat 01:00]
 
 Shift restrictions will be added as constraints as the ~employee-day~ variables are generated. Shifts will have schedule options as follows:
 
 + Every ~X~ days
 + Specified days-of-week every ~X~ weeks
-+ Specified days-of-month every ~X~ months
 
 Shift exceptions can be specified as dates and date ranges, causing the modified shift to not be generated for those dates.
 
-*** TODO Constrain employees by other obligations and personal requests
+*** TODO [#A] Model shift restrictions
 
-*** TODO Model balanced shift distribution
+**** DONE [#A] Consecutive shifts
+CLOSED: [2016-12-10 Sat 01:03]
 
-* TODO Data I/O
+The specified shift must be held by the same person, ~X~ days in a row.
 
-** TODO Store Definitions Locally
+**** DONE [#A] Subsequent shifts
+CLOSED: [2016-12-10 Sat 02:04]
 
-** TODO Sync Employee Availability
+The specified shift must be followed by one of the following, ~X~ times:
 
-** TODO Sync Produced Roster
++ Off-time
++ Specified shift(s)
++ Any other shift
++ Any outside activity (off-time or outside assignments)
 
-* TODO Graphical User Interface
+*** TODO [#A] Constrain employees by other obligations and personal requests
 
-** TODO Shift Definition Screen
+*** TODO [#A] Model balanced shift distribution
 
-** TODO Employee Definition Screen
+* TODO [#A] Data I/O
 
-*** TODO Employee Availability Screen
+** TODO [#A] Store Definitions Locally
 
-** TODO Generated Roster View
+** TODO [#A] Sync Employee Availability
 
-*** TODO Enable Roster Modification
+** TODO [#A] Sync Produced Roster
+
+* TODO [#A] Graphical User Interface
+
+** TODO [#A] Shift Definition Screen
+
+** TODO [#A] Employee Definition Screen
+
+*** TODO [#A] Employee Availability Screen
+
+** TODO [#A] Generated Roster View
+
+*** TODO [#A] Enable Roster Modification
