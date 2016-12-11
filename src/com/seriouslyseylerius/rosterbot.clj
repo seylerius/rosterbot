@@ -84,32 +84,41 @@
         shift (str "<" shift ">")]
     [shifts other out off]))
 
-(defn consecutive-shift-constraint
-  "Return an automaton requiring at least `count` shifts in a row"
-  [shifts shift count]
-  (let [[shifts other out off shift] (shift-shorthand shift shifts)]
+(defn shift-constraint
+  "Return an automaton requiring `shift` be followed by `count` of another"
+  [& kwargs]
+  (let [shifts (kwargs :shifts)
+        shift (kwargs :shift)
+        s-counted (seq? shift)
+        shift (if s-counted
+                (first)
+                shift)
+        shift-count (if s-counted
+                      (or (second shift) 1)
+                      1)
+        follower (kwargs :follower)
+        f-counted (seq? follower)
+        follower (if f-counted
+                   (first follower)
+                   follower)
+        follower-count (if follower
+                         (if f-counted
+                           (or (second follower) 1)
+                           1)
+                         0)
+        [shifts other out off shift] (shift-shorthand shift shifts)]
     (a/string->automaton
      (str other "*"
-          "(" (apply str (repeat count shift))
-          other "*" ")" "*"))))
-
-(defn subsequent-shift-constraint
-  "Return an automaton requiring `shift` be followed by `count` of another"
-  ([shifts shift follower]
-   (subsequent-shift-constraint shifts shift follower 1))
-  ([shifts shift follower count]
-   (let [[shifts other out off shift] (shift-shorthand shift shifts)]
-     (a/string->automaton
-      (str other "*"
-           shift
-           (cond
-             (= follower :off) (apply str (repeat count off))
-             (= follower :out) (apply str (repeat count out))
-             (= follower :other) (apply str (repeat count other))
-             (seq? follower) (apply str
-                                    (repeat count
-                                            (stringify-shifts
-                                             (set follower))))))))))
+          (apply str (repeat shift-count shift))
+          (cond
+            (= follower :off) (apply str (repeat follower-count off))
+            (= follower :out) (apply str (repeat follower-count out))
+            (= follower :other) (apply str (repeat follower-count other))
+            (seq? follower) (apply str
+                                   (repeat follower-count
+                                           (stringify-shifts
+                                            (set follower)))))
+          other "*"))))
 
 (defn -main
   "I don't do a whole lot ... yet."

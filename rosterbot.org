@@ -49,22 +49,20 @@ Shift restrictions will be added as constraints as the ~employee-day~ variables 
 
 Shift exceptions can be specified as dates and date ranges, causing the modified shift to not be generated for those dates.
 
-*** TODO [#A] Model shift restrictions
+*** DONE [#A] Model shift restrictions
+CLOSED: [2016-12-11 Sun 13:57]
 
-**** DONE [#A] Consecutive shifts
-CLOSED: [2016-12-10 Sat 01:03]
+I redesigned the shift-constraint model to generalize shift constraints from a single function. All arguments are keyword-args, as follows:
 
-The specified shift must be held by the same person, ~X~ days in a row.
++ =:shifts= :: The collection of defined shifts
++ =:shift= :: The shift being restricted, may be a sequence or number
+  + =count= :: An optional count, included as the second item in =:shift= as a sequence, defaults to =1=
++ =:follower= :: Optional shift-set to require after the shift. Can be =:out= (off, PTO, or outside assignment), =:other= (anything but the specified shift), =:off= (unscheduled or PTO), or a specified list of shifts; may be wrapped in a sequence
+  + =count= :: An optional count, included as the second item in =:follower= as a sequence, defaults to =1=
 
-**** DONE [#A] Subsequent shifts
-CLOSED: [2016-12-10 Sat 02:04]
+These shift-constraints are generated as finite state automata and combined. The resulting automaton is used as the row constraint for each employee. 
 
-The specified shift must be followed by one of the following, ~X~ times:
-
-+ Off-time
-+ Specified shift(s)
-+ Any other shift
-+ Any outside activity (off-time or outside assignments)
+I can optionally add the ability to set employee shift preferences, but that's a feature to consider later.
 
 *** TODO [#A] Constrain employees by other obligations and personal requests
 
