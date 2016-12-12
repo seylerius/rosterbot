@@ -66,7 +66,34 @@ I can optionally add the ability to set employee shift preferences, but that's a
 
 *** TODO [#A] Constrain employees by other obligations and personal requests
 
+Employee scheduled days (whether PTO or exterior assignments) will be tracked in per-employee maps of ~date~ → ~out-shift~, where ~out-shift~ is either ~-1~ or ~-2~ for PTO or external assignments, respectively.
+
 *** TODO [#A] Model balanced shift distribution
+
+Balanced shift distribution can be defined in terms of two scores: 
+
++ How balanced an individual employee's shifts are across the time range
++ How balanced the total shifts are between the employees
+
+These will need to be combined using the (possibly weighted) average of the two scores, and the list of solutions will be sorted by this average.
+
+**** TODO [#A] Score per-employee shift balance
+
+This is best calculated by breaking the time period into blocks of $1\over{6}$ the total time period and comparing the employee's optimal shift count per-block with the actual shift count in each block. Given the employee's total number of internal shifts $S_t$, the total number of days $T$, calculate the optimal number of shifts per-block $S_o$. Take the difference from $S_o$ of each per-block shift count $S_i$. Average those differences $D_i$ to produce $D_a$.
+
+**** TODO [#A] Score inter-employee shift balance
+
+This is fairly easy to compute. Given the total number of internal shifts $S_t$, the total number of team members $T$, and the number of shifts assigned to each team member $S_i$, compute the average deviation $D_a$ from the optimal shift distribution $S_o$.
+
+#+BEGIN_LaTeX
+$$ S_o = {S_t\over{T}} $$
+
+$$ D_i = |S_o - S_i| $$
+
+$$ D_a = {{\sum^i_{0 \rightarrow (T - 1)} D_i} \over{T}} $$
+#+END_LaTeX
+
+**** TODO [#A] Sort solutions by overall score
 
 * TODO [#A] Data I/O
 
