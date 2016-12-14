@@ -86,7 +86,7 @@
 
 (defn shift-constraint
   "Return an automaton requiring `shift` be followed by `count` of another"
-  [& kwargs]
+  [& {:as kwargs}]
   (let [shifts (kwargs :shifts)
         shift (kwargs :shift)
         s-counted (seq? shift)
