@@ -1,4 +1,4 @@
-#+title: RosterBot
+j#+title: RosterBot
 #+author: Elliott "Seylerius" Seyler
 
 RosterBot is a tool for automatically generating duty rosters for teams. Operating on [[https://en.wikipedia.org/wiki/Constraint_programming][Constraint Programming]], the software narrows the pool of schedules based on the specified restrictions, then iterates through them to find an optimal selection.
@@ -81,17 +81,21 @@ These will need to be combined using the (possibly weighted) average of the two 
 
 This is best calculated by breaking the time period into blocks of $1\over{6}$ the total time period and comparing the employee's optimal shift count per-block with the actual shift count in each block. Given the employee's total number of internal shifts $S_t$, the total number of days $T$, calculate the optimal number of shifts per-block $S_o$. Take the difference from $S_o$ of each per-block shift count $S_i$. Average those differences $D_i$ to produce $D_a$.
 
+$$ S_o = {S_t \over 6} $$
+
+$$ D_i = |S_o - S_i| $$
+
+$$ D_a = {{\sum^5_{i=0} D_i} \over{6}} $$
+
 **** TODO [#A] Score inter-employee shift balance
 
 This is fairly easy to compute. Given the total number of internal shifts $S_t$, the total number of team members $T$, and the number of shifts assigned to each team member $S_i$, compute the average deviation $D_a$ from the optimal shift distribution $S_o$.
 
-#+BEGIN_LaTeX
 $$ S_o = {S_t\over{T}} $$
 
 $$ D_i = |S_o - S_i| $$
 
-$$ D_a = {{\sum^i_{0 \rightarrow (T - 1)} D_i} \over{T}} $$
-#+END_LaTeX
+$$ D_a = {{\sum^{T-1}_{i=0} D_i} \over{T}} $$
 
 **** TODO [#A] Sort solutions by overall score
 
