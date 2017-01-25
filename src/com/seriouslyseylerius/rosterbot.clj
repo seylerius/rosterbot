@@ -6,7 +6,9 @@
             [clj-time.periodic :as p]
             [clj-time.predicates :as pr]
             [clj-time.format :as f]
-            [cuerdas.core :as s])
+            [cuerdas.core :as s]
+            [clojure.spec :as spec]
+            [clojure.set :as set])
   (:gen-class))
 
 (defn all-shift-vars
@@ -53,72 +55,100 @@
   [acum [ks c]]
   (assoc-in acum ks (max (get-in acum ks 0) c)))
 
+(defn shift-count-cleaner
+  [[ks c]]
+  [ks (if (nil? c) 0 c)])
+
 (defn shift-counter
   "Given shifts and a date-range, return days mapped to shift counts"
   [dates shifts]
-  (let [day-shifts (for [day dates
-                           shift shifts
-                           :when (valid-shift day shift (first dates))]
-                       [[day (shift :id)] (shift :count)])]
+  (let [day-shifts (map shift-count-cleaner
+                        (for [day dates
+                              shift shifts
+                              :when (valid-shift day shift (first dates))]
+                          [[day (shift :id)] (shift :count)]))]
     (reduce shift-reducer {} day-shifts)))
 
 (defn day-constraint
   "Given a team, a day and a map of shift-counts, return a cardinality constraint"
-  [team day shift-counts]
+  [team [day shift-counts]]
   (let [column (for [n (range (count team))]
                  [:shift n day])]
     ($cardinality column shift-counts)))
+
+(defn day-constraints
+  [dates team shifts]
+  (map (partial day-constraint team) (shift-counter dates shifts)))
 
 (defn stringify-shifts
   [shifts]
   (let [str-shifts (s/join "|" (for [shift shifts]
                                  (str "<" shift ">")))]
-       (str "(" str-shifts ")")))
+    (str "(" str-shifts ")")))
 
-(defn shift-shorthand
-  [shift shifts]
-  (let [shifts (conj (set shifts) 0 -1 -2)
-        other (stringify-shifts (disj shifts shift))
-        out (stringify-shifts [0 -1 -2])
-        off (stringify-shifts [0 -1])
-        shift (str "<" shift ">")]
-    [shifts other out off]))
+(defn shift-automaton
+  [shifts rule]
+  (a/string->automaton
+   (let [shifts (set/union (set shifts) #{0 -1})
+         shift (first rule)
+         other (stringify-shifts (disj shifts shift))]
+     (->> rule
+          (map #(str "<" % ">"))
+          (apply str)
+          (#(str "(" other "*(" % ")*" other "*)*"))))))
 
-(defn shift-constraint
-  "Return an automaton requiring `shift` be followed by `count` of another"
-  [& {:as kwargs}]
-  (let [shifts (kwargs :shifts)
-        shift (kwargs :shift)
-        s-counted (seq? shift)
-        shift (if s-counted
-                (first)
-                shift)
-        shift-count (if s-counted
-                      (or (second shift) 1)
-                      1)
-        follower (kwargs :follower)
-        f-counted (seq? follower)
-        follower (if f-counted
-                   (first follower)
-                   follower)
-        follower-count (if follower
-                         (if f-counted
-                           (or (second follower) 1)
-                           1)
-                         0)
-        [shifts other out off shift] (shift-shorthand shift shifts)]
-    (a/string->automaton
-     (str other "*"
-          (apply str (repeat shift-count shift))
-          (cond
-            (= follower :off) (apply str (repeat follower-count off))
-            (= follower :out) (apply str (repeat follower-count out))
-            (= follower :other) (apply str (repeat follower-count other))
-            (seq? follower) (apply str
-                                   (repeat follower-count
-                                           (stringify-shifts
-                                            (set follower)))))
-          other "*"))))
+(defn shift-requirements
+  [dates team shifts rules]
+  (let [constraints (map (partial shift-automaton shifts) rules)
+        automaton (reduce a/union constraints)
+        rows (partition (count dates) (for [t team d dates] [:shift t d]))]
+    (map (partial $regular automaton) rows)))
+
+(defn external-assignment-constraints
+  [externals]
+  (for [[team-member out-dates] externals
+        day out-dates]
+    ($= [:shift team-member day] -1)))
+
+(defn personal-assignment-constraints
+  [personals]
+  (for [[team-member off-dates] personals
+        day off-dates]
+    ($= [:shift team-member day] 0)))
+
+(defn score
+  [dates team shifts rules personals]
+  (let [personal-constraints (personal-assignment-constraints personals)
+        personal-handles (map #(keyword (str "p" %))
+                              (range (count personal-constraints)))
+        constraints (map (partial shift-automaton (map :id shifts)) rules)
+        automaton (reduce a/union constraints)
+        rows (partition (count dates) (for [t team d dates] [:shift t d]))
+        shift-constraints (map (partial $regular automaton) rows)
+        row-handles (map #(keyword (str "r" %))
+                         (range (count shift-constraints)))]
+    (conj (mapcat (partial apply concat)
+                  (for [[i row-const] (map vector
+                                           row-handles shift-constraints)]
+                    [($in i 0 1)
+                     ($= i ($reify row-const))])
+                  (for [[j p-const] (map vector
+                                         personal-handles
+                                         personal-constraints)]
+                    [($in j 0 1)
+                     ($= j ($reify p-const))]))
+          (let [shift-score ($* 500 (apply $+ row-handles))
+                personals-score ($* 100 (apply $+ personal-handles))]
+            ($+ shift-score personals-score)))))
+
+(defn solve-roster
+  [dates team shifts rules externals personals]
+  (solution (concat (shift-var-declarations team shifts dates)
+                    (day-constraints dates team shifts)
+                    (shift-requirements dates team (map :id shifts) (:required rules))
+                    (external-assignment-constraints externals))
+            ;; :maximize (score dates team shifts (:optional rules) personals)
+            ))
 
 (defn -main
   "I don't do a whole lot ... yet."

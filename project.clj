@@ -3,7 +3,7 @@
   :url "http://github.com/seylerius/rosterbot"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.8.0"]
+  :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
                  [loco "0.3.1"]
                  [google-apps-clj "0.5.3"]
                  [clj-pdf "2.2.8"]

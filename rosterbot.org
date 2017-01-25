@@ -1,4 +1,4 @@
-j#+title: RosterBot
+#+title: RosterBot
 #+author: Elliott "Seylerius" Seyler
 
 RosterBot is a tool for automatically generating duty rosters for teams. Operating on [[https://en.wikipedia.org/wiki/Constraint_programming][Constraint Programming]], the software narrows the pool of schedules based on the specified restrictions, then iterates through them to find an optimal selection.
